@@ -1,6 +1,6 @@
 
 // ⚠️ Remplacez par l'URL de votre Web App (doit finir par /exec)
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyuMna5F_FLzrOy5OBCtKEW2aUGi3f0UMK3qVfB9VNUzEUZ87VSQlh8JitSiBqphe6G/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVj54zRu7thvDhhRtnFp1evjF6NjLIAB4zJHazPorbnS6PM6bJ-KsdFWXfXUgCkIl0/exec";
 
 const groups=[
  {title:"Installations",items:["G-DEG","G-IAM","RTC-DEG","RTC-IAM"]},
