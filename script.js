@@ -1,6 +1,7 @@
 
+
 // ⚠️ Remplacez par l'URL de votre Web App (doit finir par /exec)
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVj54zRu7thvDhhRtnFp1evjF6NjLIAB4zJHazPorbnS6PM6bJ-KsdFWXfXUgCkIl0/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbywJYt2zt4BaW1aRV3j-JTkDxyrQhFZWhk02rXCfixIXxx6JKEOzFpD9Y4PeVk3EAUW/exec";
 
 const groups=[
  {title:"Installations",items:["G-DEG","G-IAM","RTC-DEG","RTC-IAM"]},
@@ -137,7 +138,19 @@ const iso2dmy=s=>{const p=s.split("-");return p[2]+"/"+p[1]+"/"+p[0]};
 const addDays=(s,n)=>{const d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return isoOf(d)};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
-let adminPass="",adminData=null,adminDay=isoOf(new Date());
+let adminPass="",adminData=null,adminDay=isoOf(new Date()),adminDays=0;
+// Nombre de jours à demander au serveur selon la date choisie (corrige l'affichage des anciennes dates)
+function daysNeeded(){
+  const t=new Date();t.setHours(0,0,0,0);
+  const p=new Date(adminDay+"T00:00:00");
+  return Math.min(366,Math.max(60,Math.ceil((t-p)/864e5)+8));
+}
+// Recharge les données si la date choisie est plus ancienne que la période déjà chargée
+async function ensureRange(){
+  if(!adminData||daysNeeded()<=adminDays)return;
+  adminMsg.textContent="Chargement...";
+  try{await loadAdmin()}catch(e){adminMsg.textContent="✗ "+(e.message||"Erreur")}
+}
 const curUser=()=>{try{return localStorage.getItem("sit_user")||""}catch(e){return ""}};
 // Rôles : utilisateur seul / admin seul (accès direct à l'analyse) / les deux (page + bouton admin)
 function applyRole(isU,isA){
@@ -158,9 +171,10 @@ try{
 if(curUser()){api({action:"checkUser",username:curUser()}).then(r=>{if(r&&r.success)applyRole(!!r.isUser,!!r.isAdmin)}).catch(()=>{})}
 
 async function loadAdmin(){
-  const r=await api({action:"getAdminData",username:curUser(),password:adminPass,days:"30"});
+  const d=daysNeeded();
+  const r=await api({action:"getAdminData",username:curUser(),password:adminPass,days:String(d)});
   if(!r.success)throw new Error(r.message||"Erreur.");
-  adminData=r;
+  adminData=r;adminDays=d;
 }
 function openPanel(){panel.hidden=false;document.body.style.overflow="hidden";dPick.value=adminDay;renderAdmin()}
 function promptAuth(msg){aPass.value="";aMsg.textContent=msg||"";aAuth.classList.add("show");setTimeout(()=>aPass.focus(),100)}
@@ -183,9 +197,9 @@ document.getElementById("aOk").onclick=async()=>{
 };
 aPass.addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("aOk").click()});
 document.getElementById("adminClose").onclick=()=>{panel.hidden=true;document.body.style.overflow=""};
-dPick.onchange=()=>{if(dPick.value){adminDay=dPick.value;renderAdmin()}};
-document.getElementById("dPrev").onclick=()=>{adminDay=addDays(adminDay,-1);dPick.value=adminDay;renderAdmin()};
-document.getElementById("dNext").onclick=()=>{adminDay=addDays(adminDay,1);dPick.value=adminDay;renderAdmin()};
+dPick.onchange=async()=>{if(dPick.value){adminDay=dPick.value;await ensureRange();renderAdmin()}};
+document.getElementById("dPrev").onclick=async()=>{adminDay=addDays(adminDay,-1);dPick.value=adminDay;await ensureRange();renderAdmin()};
+document.getElementById("dNext").onclick=async()=>{adminDay=addDays(adminDay,1);dPick.value=adminDay;await ensureRange();renderAdmin()};
 document.getElementById("dRef").onclick=async()=>{adminMsg.textContent="Actualisation...";try{await loadAdmin();renderAdmin()}catch(e){adminMsg.textContent="✗ "+(e.message||"Erreur")}};
 
 function renderAdmin(){
@@ -233,3 +247,4 @@ function renderAdmin(){
 }
 
 render();
+

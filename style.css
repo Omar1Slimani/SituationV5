@@ -1,4 +1,5 @@
 
+
 :root{--red:#e30613;--red-d:#b8040f;--red-l:#fdecee;--bg:#f5f5f7;--card:#fff;--text:#1c1c24;--muted:#7a7a88;--b:#ececf0;--sh:0 2px 10px rgba(0,0,0,.06);box-sizing:border-box;padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15151a;--card:#1f1f26;--text:#f2f2f5;--muted:#9a9aa8;--b:#2e2e38;--red-l:#3a1519}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -78,3 +79,4 @@ button svg{width:20px;height:20px;flex:0 0 auto}
 .tbl .zero,.tbl .miss{color:var(--muted)}.tbl .miss{font-style:italic}
 .tbl tr.tot td{font-weight:800;color:var(--red)}
 body.adminonly header,body.adminonly .wrap{display:none}
+
